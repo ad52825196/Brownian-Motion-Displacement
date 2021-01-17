@@ -1,5 +1,8 @@
 import math
 import random
+import concurrent.futures
+
+THREAD_COUNT = 16
 
 def main():
 	while True:
@@ -14,7 +17,16 @@ def main():
 		if (n == 0):
 			break
 
-		x, y = simulate(n)
+		x = y = 0
+		workload = [int(n / THREAD_COUNT)] * THREAD_COUNT
+		workload[0] += n % THREAD_COUNT
+		with concurrent.futures.ThreadPoolExecutor() as executor:
+			futures = [executor.submit(simulate, param) for param in workload]
+			for future in futures:
+				dx, dy = future.result()
+				x += dx
+				y += dy
+
 		displacement = math.sqrt(x ** 2 + y ** 2)
 		print(f'The final displacement after {n} rounds is {displacement}, its square is {displacement ** 2}')
 
