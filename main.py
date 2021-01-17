@@ -2,7 +2,7 @@ import math
 import random
 import concurrent.futures
 
-THREAD_COUNT = 16
+PROCESS_COUNT = 16
 
 def main():
 	while True:
@@ -18,12 +18,12 @@ def main():
 			break
 
 		x = y = 0
-		workload = [int(n / THREAD_COUNT)] * THREAD_COUNT
-		workload[0] += n % THREAD_COUNT
-		with concurrent.futures.ThreadPoolExecutor() as executor:
-			futures = [executor.submit(simulate, param) for param in workload]
+		workload = [int(n / PROCESS_COUNT)] * PROCESS_COUNT
+		workload[0] += n % PROCESS_COUNT
+		with concurrent.futures.ProcessPoolExecutor() as executor:
+			futures = executor.map(simulate, workload)
 			for future in futures:
-				dx, dy = future.result()
+				dx, dy = future
 				x += dx
 				y += dy
 
